@@ -1,0 +1,16 @@
+El síntoma principal era que el Teensy 4.1 reportaba permanentemente ECU DESCONECTADA a pesar de que el hardware físico estaba en perfectas condiciones (había 5V en el puerto Host, la continuidad de los pines D+/D- era correcta y el cable funcionaba perfectamente en una Raspberry Pi o PC).
+
+La causa raíz radica en cómo los microcontroladores manejan los dispositivos USB. El cable de la ECU RaceTech utiliza un chip conversor USB-Serial de la familia FTDI, pero con un Identificador de Producto (PID) específico: 6015 (y un Identificador de Vendedor, VID: 0403). A diferencia de un sistema operativo completo como Linux o Windows que busca drivers automáticamente, la librería USBHost_t36 del Teensy utiliza una tabla estricta o "lista blanca" de chips pre-aprobados. Como el PID 6015 no venía cargado de fábrica en esa tabla, el driver de bajo nivel del Teensy ignoraba el cable por completo, impidiendo que el código de la máquina de estados siquiera intentara el handshake.
+
+La Solución: Modificación del driver de bajo nivel (serial.cpp)
+Para resolverlo, fue necesario "enseñarle" al entorno de programación que este chip específico de RaceTech es un conversor serial legítimo. Los pasos para replicar o adaptar esta solución en el futuro son:
+
+Identificar el VID/PID del cable: Conectar el dispositivo directamente a una PC con Windows, ir al Administrador de Dispositivos, buscar el puerto COM correspondiente y revisar la propiedad "Id. de hardware" en la pestaña Detalles.
+
+Localizar el archivo del driver del microcontrolador: Para el Teensy en Windows, el archivo responsable de esta lista es serial.cpp, ubicado en la ruta del núcleo de la placa (típicamente C:\Users\[Usuario]\AppData\Local\Arduino15\packages\teensy\hardware\avr\[versión]\libraries\USBHost_t36\).
+
+Agregar la excepción: Abrir serial.cpp con un editor de texto, buscar la tabla de mapeo de hardware llamada USBSerialBase::pid_vid_mapping[] y agregar el ID de la ECU justo debajo de los otros chips FTDI:
+
+{0x0403, 0x6015, USBSerialBase::FTDI, 0},
+
+Recompilar: Guardar el archivo y volver a presionar "Subir" en el Arduino IDE. El compilador integra esta nueva regla, permitiendo que el objeto USBSerial del código detecte la conexión física e inicie la transmisión de datos.
