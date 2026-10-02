@@ -1,6 +1,6 @@
 Es un encoder incremental de 600 pulsos por vuelta, cuadratura (OUT A / OUT B desfasados 90°), alimentación 5-24V DC.
 
-- Rojo → VCC
+- Rojo → VCC (5V)
 - Negro → GND
 - Verde → OUT A
 - Blanco → OUT B
