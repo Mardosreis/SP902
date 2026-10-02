@@ -282,7 +282,7 @@ void tareaECU(unsigned long ahora) {
 void setup() {
     Serial.begin(115200); // Inicia el cable USB que va a la PC para leer los prints
     myusb.begin();        // Enciende el hardware USB interno del microcontrolador
-    delay(200);           // Pequeño respiro eléctrico antes de arrancar
+    delay(5000);           // Pequeño respiro eléctrico antes de arrancar
 }
 
 void loop() {
