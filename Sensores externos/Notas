@@ -1,0 +1,12 @@
+Marrón → pin 3.3V del Teensy (NUNCA al 5V, porque el ADC del Teensy 4.1 no tolera 5V). 
+Azul → GND del Teensy. 
+Negro → A0. Al alimentar con 3.3V, la salida del cursor ya varía entre 0V y 3.3V de forma natural, perfecta para el ADC. Con esto te ahorrás el divisor y el error que agregarían las resistencias.
+
+Con el sensor desconectado del Teensy: medí resistencia entre marrón y azul (debe rondar el valor de la tabla según tu modelo, por ejemplo ~25.5 KΩ para el de 25mm o ~602 KΩ para el de 600mm). Después medí entre negro y azul mientras movés el vástago a mano: la resistencia debe variar suavemente de 0 a ese valor total, sin saltos ni cortes. Si da infinito o no varía, el sensor o el cable está dañado.
+
+
+Siempre en 0: el cable negro (salida) está haciendo masa, o no le está llegando alimentación al sensor (revisá continuidad entre marrón y el 3.3V del Teensy).
+Siempre en 4095 (o cerca): el cable negro está en corto con el marrón (alimentación), o el azul no está haciendo GND.
+Número que salta de forma errática, sin relación con el movimiento del vástago: el pin A0 está "flotando" — el negro no está realmente conectado a nada firme. Revisá el contacto del cable.
+Se mueve pero al revés (sube cuando debería bajar): está bien, no es un error — invertí marrón y azul, o simplemente restale el valor a 4095 en software si no querés destocar los cables.
+Valor estable y razonable, pero no se mueve al mover el vástago: el sensor en sí puede estar trabado o dañado — volvé al paso 3 (multímetro, sensor desconectado) para descartarlo antes de seguir sospechando del Teensy.
